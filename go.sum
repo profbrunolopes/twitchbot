@@ -1,0 +1,3 @@
+github.com/gempir/go-twitch-irc v1.1.0 h1:Q9gQGI/3yJzYwlYDlFsGJzWfpaqubMExfmBXNpOC6W0=
+github.com/gempir/go-twitch-irc/v2 v2.4.0 h1:y0YD+liBhP7f5Yb0qMhgly0slIcFUb30E5O3YgHF7zw=
+github.com/gempir/go-twitch-irc/v2 v2.4.0/go.mod h1:120d2SdlRYg8tRnZwsyNPeS+mWPn+YmNEzB7Bv/CDGE=
