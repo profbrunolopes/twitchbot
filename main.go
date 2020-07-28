@@ -1,14 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/ChicoCodes/twitchbot/messages"
 )
 
 func main() {
-	producer := messages.NewProducer("ChicoCodes")
+	channel := flag.String("channel", "ChicoCodes", "channel to listen to")
+	flag.Parse()
 
+	producer := messages.NewProducer(*channel)
 	messages, err := producer.Subscribe("random string")
 	if err != nil {
 		panic(err)
