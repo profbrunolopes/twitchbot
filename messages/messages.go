@@ -1,13 +1,26 @@
 package messages
 
 import (
+	"crypto/rand"
+	"fmt"
+	"io"
 	"sync"
 	"time"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-type Notify func(Message)
+type Notification struct {
+	Message      Message
+	channel      string
+	twitchClient *twitch.Client
+}
+
+func (n *Notification) Reply(msg string) {
+	n.twitchClient.Say(n.channel, msg)
+}
+
+type Notify func(Notification)
 
 type Producer struct {
 	client      *twitch.Client
@@ -44,22 +57,34 @@ func NewProducer(options *ProducerOptions) *Producer {
 }
 
 func (p *Producer) privateMessageCb(msg twitch.PrivateMessage) {
-	message := Message{
-		User:      msg.User.DisplayName,
-		Text:      msg.Message,
-		Timestamp: msg.Time,
+	notification := Notification{
+		Message: Message{
+			User:      msg.User.DisplayName,
+			Text:      msg.Message,
+			Timestamp: msg.Time,
+		},
+		channel:      msg.Channel,
+		twitchClient: p.client,
 	}
 	for _, notify := range p.subscribers {
-		go notify(message)
+		go notify(notification)
 	}
 }
 
-func (p *Producer) Subscribe(notify Notify) string {
+func (p *Producer) Subscribe(notify Notify) (string, error) {
+	var buf [8]byte
+	n, err := rand.Read(buf[:])
+	if err != nil {
+		return "", err
+	}
+	if n != len(buf) {
+		return "", io.ErrShortWrite
+	}
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	id := "id aleatório"
+	id := fmt.Sprintf("%x", buf[:])
 	p.subscribers[id] = notify
-	return id
+	return id, err
 }
 
 func (p *Producer) Unsubscribe(id string) {

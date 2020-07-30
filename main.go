@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/ChicoCodes/twitchbot/messages"
 	"github.com/kelseyhightower/envconfig"
@@ -20,8 +21,14 @@ func main() {
 	}
 
 	producer := messages.NewProducer(&options)
-	producer.Subscribe(func(msg messages.Message) {
+	producer.Subscribe(func(notification messages.Notification) {
+		msg := notification.Message
 		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User, msg.Text)
+	})
+	producer.Subscribe(func(notification messages.Notification) {
+		if strings.Contains(strings.ToLower(notification.Message.Text), "salve") {
+			notification.Reply(":w")
+		}
 	})
 	err = producer.Start()
 	if err != nil {
