@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	channel := flag.String("channel", "ChicoCodes", "channel to listen to")
+	channel := flag.String("channel", "ChicoCodes", "channel to connect to")
 	flag.Parse()
 
 	producer := messages.NewProducer(*channel)
