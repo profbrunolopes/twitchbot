@@ -7,9 +7,11 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
+type Notify func(Message)
+
 type Producer struct {
 	client      *twitch.Client
-	subscribers map[string]*Subscriber
+	subscribers map[string]Notify
 	connected   bool
 	mtx         sync.RWMutex
 }
@@ -28,17 +30,10 @@ type Message struct {
 func NewProducer(twitchChannel string) *Producer {
 	producer := &Producer{
 		client:      twitch.NewAnonymousClient(),
-		subscribers: map[string]*Subscriber{},
+		subscribers: map[string]Notify{},
 	}
 	producer.client.OnPrivateMessage(func(msg twitch.PrivateMessage) { producer.privateMessageCb(msg) })
 	producer.client.Join(twitchChannel)
-	// fix error handling
-	go func() {
-		err := producer.client.Connect()
-		if err != nil {
-			panic(err)
-		}
-	}()
 	return producer
 }
 
@@ -48,25 +43,25 @@ func (p *Producer) privateMessageCb(msg twitch.PrivateMessage) {
 		Text:      msg.Message,
 		Timestamp: msg.Time,
 	}
-	for _, subscriber := range p.subscribers {
-		subscriber.messages <- message
+	for _, notify := range p.subscribers {
+		go notify(message)
 	}
 }
 
-func (p *Producer) Subscribe(id string) (<-chan Message, error) {
-	const msgChanCapacity = 10
-	messages := make(chan Message, msgChanCapacity)
+func (p *Producer) Subscribe(notify Notify) string {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-
-	// note: should refactor this, don't want to override previously
-	// defined subscriber.
-	p.subscribers[id] = &Subscriber{id: id, messages: messages}
-	return messages, nil
+	id := "id aleatório"
+	p.subscribers[id] = notify
+	return id
 }
 
 func (p *Producer) Unsubscribe(id string) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	delete(p.subscribers, id)
+}
+
+func (p *Producer) Start() error {
+	return p.client.Connect()
 }

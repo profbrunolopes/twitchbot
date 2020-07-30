@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/ChicoCodes/twitchbot/messages"
 )
@@ -12,11 +13,11 @@ func main() {
 	flag.Parse()
 
 	producer := messages.NewProducer(*channel)
-	messages, err := producer.Subscribe("random string")
+	producer.Subscribe(func(msg messages.Message) {
+		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User, msg.Text)
+	})
+	err := producer.Start()
 	if err != nil {
-		panic(err)
-	}
-	for message := range messages {
-		fmt.Printf("[%s] %s: %s\n", message.Timestamp, message.User, message.Text)
+		log.Fatal(err)
 	}
 }
