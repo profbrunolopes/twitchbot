@@ -27,13 +27,19 @@ type Message struct {
 	Timestamp time.Time
 }
 
-func NewProducer(twitchChannel string) *Producer {
+type ProducerOptions struct {
+	UserName   string `envconfig:"BOT_USERNAME"`
+	OAuthToken string `envconfig:"OAUTH_TOKEN"`
+	Channel    string `ignored:"true"`
+}
+
+func NewProducer(options *ProducerOptions) *Producer {
 	producer := &Producer{
-		client:      twitch.NewAnonymousClient(),
+		client:      twitch.NewClient(options.UserName, options.OAuthToken),
 		subscribers: map[string]Notify{},
 	}
 	producer.client.OnPrivateMessage(func(msg twitch.PrivateMessage) { producer.privateMessageCb(msg) })
-	producer.client.Join(twitchChannel)
+	producer.client.Join(options.Channel)
 	return producer
 }
 
