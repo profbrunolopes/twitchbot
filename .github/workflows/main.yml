@@ -1,0 +1,36 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    name: clone and lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2.1.1
+        id: go
+        with:
+          go-version: 1.x
+
+      - uses: actions/checkout@v2.3.1
+
+      - name: install deps
+        run: go mod download
+
+      - name: install golangci-lint
+        run: go get github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        working-directory: /
+        env:
+          GO111MODULE: on
+
+      - name: run-linter
+        run: golangci-lint run
+        env:
+          GOPROXY: off
+          GOFLAGS: -mod=readonly

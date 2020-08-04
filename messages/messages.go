@@ -25,13 +25,7 @@ type Notify func(Notification)
 type Producer struct {
 	client      *twitch.Client
 	subscribers map[string]Notify
-	connected   bool
 	mtx         sync.RWMutex
-}
-
-type Subscriber struct {
-	id       string
-	messages chan<- Message
 }
 
 type Message struct {
