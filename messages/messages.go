@@ -60,6 +60,8 @@ func (p *Producer) privateMessageCb(msg twitch.PrivateMessage) {
 		channel:      msg.Channel,
 		twitchClient: p.client,
 	}
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
 	for _, notify := range p.subscribers {
 		go notify(notification)
 	}
