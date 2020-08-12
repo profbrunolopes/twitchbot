@@ -4,5 +4,6 @@ run:
 linters:
   enable-all: true
   disable:
+    - misspell
     - nlreturn
     - wsl
