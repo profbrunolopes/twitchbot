@@ -98,7 +98,7 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 			return
 		}
 		const file = "/tmp/colorscheme.txt"
-		err := ioutil.WriteFile(file, []byte(parts[1]), 0644)
+		err := ioutil.WriteFile(file, []byte(parts[1]), 0600)
 		if err != nil {
 			notification.Reply(fmt.Sprintf("deu erro escrevendo o arquivo com colorscheme %v", err))
 			return
