@@ -91,6 +91,9 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 		notification.Reply(fmt.Sprintf("/me baniu %s por usar dark mode", parts[1]))
 	}
 
+	// próxima lives:
+	// 1) fazer funcionar o colorscheme (plugin pro vim)
+	// 2) lógica decente para comandos (separar parsing & execution)
 	if strings.HasPrefix(notification.Message.Text, "!colorscheme") {
 		parts := strings.SplitN(notification.Message.Text, " ", 2)
 		if len(parts) != 2 {
