@@ -97,7 +97,7 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 	if strings.HasPrefix(notification.Message.Text, "!colorscheme") {
 		parts := strings.SplitN(notification.Message.Text, " ", 2)
 		if len(parts) != 2 {
-			notification.Reply("comando inválido")
+			notification.Reply("/me veja lista de colorscheme disponíveis: https://skip.gg/erHqu")
 			return
 		}
 		const file = "/tmp/colorscheme.txt"
