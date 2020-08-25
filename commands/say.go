@@ -3,9 +3,12 @@ package commands
 import (
 	"log"
 	"os/exec"
+	"strings"
+
+	"github.com/ChicoCodes/twitchbot/messages"
 )
 
-func startSaying() chan<- string {
+func startSaying() *Command {
 	ch := make(chan string, 50)
 	go func() {
 		for message := range ch {
@@ -15,5 +18,11 @@ func startSaying() chan<- string {
 			}
 		}
 	}()
-	return ch
+	return &Command{
+		MinArgs: 1,
+		Help:    "diz sua mensagem aí pow",
+		Exec: func(args []string, _ *messages.Notification) {
+			ch <- strings.Join(args, " ")
+		},
+	}
 }

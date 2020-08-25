@@ -3,123 +3,90 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/ChicoCodes/twitchbot/messages"
 )
 
+// Command represents a bot command.
+//
+// TODO(fsouza): implement permissions? Or handle permissions as suggested by
+// @CodeShow?
+type Command struct {
+	MinArgs int
+	Exec    func(args []string, notification *messages.Notification)
+	Help    string
+}
+
+func commandFn(exec func([]string, *messages.Notification)) *Command {
+	return &Command{Exec: exec}
+}
+
 type Commands struct {
-	sayChan chan<- string
+	commands map[string]*Command
 }
 
+// New creates the command processor.
+//
+// TODO(fsouza): allow registering commands dynamically, so we don't need to
+// declare the list of commands statically in the constructor.
 func New() (*Commands, error) {
-	sayChan := startSaying()
-	return &Commands{sayChan: sayChan}, nil
+	rand.Seed(time.Now().Unix())
+	commands := map[string]*Command{
+		"say": startSaying(),
+		"sorteio": commandFn(func(_ []string, notification *messages.Notification) {
+			notification.Reply(fmt.Sprintf("parabéns %s, você ganhou uma licença do Vim!", notification.Message.User))
+		}),
+		"ban": {
+			MinArgs: 1,
+			Exec: func(args []string, notification *messages.Notification) {
+				reasons := []string{
+					"chamar biscoito de bolacha",
+					"usar dark mode",
+					"usar emacs",
+					"comprar rodinha da Apple de 4 mil reais",
+					"comprar um Mac Pro pra jogar Minecraft",
+					"usar VSCode",
+					"jogar Tibia",
+					"usar Windows",
+					"abusar do !say",
+					"depositar 89 mil reais na conta da Micheque Kappa",
+				}
+				reason := reasons[rand.Intn(len(reasons))]
+				notification.Reply(fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User, strings.Join(args, " "), reason))
+			},
+		},
+		"colorscheme": {
+			MinArgs: 1,
+			Exec: func(args []string, notification *messages.Notification) {
+				const file = "/tmp/colorscheme.txt"
+				err := ioutil.WriteFile(file, []byte(strings.Join(args, " ")), 0600)
+				if err != nil {
+					notification.Reply(fmt.Sprintf("deu erro escrevendo o arquivo com colorscheme %v", err))
+					return
+				}
+			},
+		},
+	}
+	return &Commands{commands: commands}, nil
 }
-
-// !addcommand
-// !rmcommand
-// !commands
-
-// syntax for addcommand:
-//
-//   - !addcommand <comando> <ação> [parâmetros para a ação ...]
-//
-//   exemplos de ações: alias, write-file, reply,
-//   exemplos de ações: alias, write-file, reply,
-//   exemplos de ações: alias, write-file, reply,
-//   exemplos de ações: alias, write-file, reply,
-//   exemplos de ações: alias, write-file, reply,
-//
-// !addcommand comandos alias commands
-//
-// !comandos => !commands
-//
-// !addcommand color write-file /tmp/colorscheme.txt
-
-// !color gruvbox dark
-//
-// -> escreve /tmp/colorscheme.txt
-// -> vamos criar um plugin genérico pro vim que monitora arquivos e chama uma
-//    função sempre que o arquivo muda, passando o path como parâmetro da função
-// -> vamos usar esse plugin para escrever uma função que lê o conteúdo do
-// arquivo e define o colorscheme e background
-
-// !ban
-
-// sistema de permissão melhor:
-//
-// -> por comando (checa se o usuário é ChicoCodes ou chicocodesbot - ou
-//    nightbot)
-//      sugestão do CodeShow: usar palavras proibidas
-//      solução ideal: integrar com a API do Twitch (QUAL API?!)
-//
-// -> integrado com o twitch pra saber role do usuário
-//    + comandos só pra mod (& broadcaster)
-//    + comandos pra todo mundo
-//
-// -> colorscheme pode ir pra lojinha, e o bot executa o comando.
 
 func (c *Commands) Subscribe(notification messages.Notification) {
-	if strings.HasPrefix(notification.Message.Text, "!starttimer") {
-		// sistema de permissão avançado
-		if strings.ToLower(notification.Message.User) != "chicocodes" {
-			return
-		}
-
-		parts := strings.SplitN(notification.Message.Text, " ", 3)
-		if len(parts) != 3 {
-			notification.Reply("comando inválido")
-			return
-		}
-		duration, err := time.ParseDuration(parts[1])
-		if err != nil {
-			notification.Reply(fmt.Sprintf("%v não é uma duração válida", parts[1]))
-			return
-		}
-		go func() {
-			<-time.After(duration)
-			notification.Reply(fmt.Sprintf("/me timer %q encerrado", parts[2]))
-		}()
+	text := notification.Message.Text
+	if !strings.HasPrefix(text, "!") {
+		return
 	}
 
-	if strings.HasPrefix(notification.Message.Text, "!ban") {
-		parts := strings.SplitN(notification.Message.Text, " ", 2)
-		if len(parts) != 2 {
-			notification.Reply("comando inválido")
+	parts := strings.Split(text, " ")
+	commandName := parts[0][1:]
+	args := parts[1:]
+	if command := c.commands[commandName]; command != nil {
+		if len(args) < command.MinArgs {
+			notification.Reply(command.Help)
 			return
 		}
-		notification.Reply(fmt.Sprintf("/me baniu %s por usar dark mode", parts[1]))
-	}
-
-	if strings.HasPrefix(notification.Message.Text, "!sorteio") {
-		notification.Reply(fmt.Sprintf("parabéns %s, você ganhou uma licença do Vim!", notification.Message.User))
-	}
-
-	if strings.HasPrefix(notification.Message.Text, "!say") {
-		parts := strings.SplitN(notification.Message.Text, " ", 2)
-		if len(parts) != 2 {
-			notification.Reply("comando inválido")
-			return
-		}
-		c.sayChan <- parts[1]
-	}
-
-	// próxima lives:
-	// 1) fazer funcionar o colorscheme (plugin pro vim)
-	// 2) lógica decente para comandos (separar parsing & execution)
-	if strings.HasPrefix(notification.Message.Text, "!colorscheme") {
-		parts := strings.SplitN(notification.Message.Text, " ", 2)
-		if len(parts) != 2 {
-			notification.Reply("/me veja lista de colorscheme disponíveis: https://skip.gg/erHqu")
-			return
-		}
-		const file = "/tmp/colorscheme.txt"
-		err := ioutil.WriteFile(file, []byte(parts[1]), 0600)
-		if err != nil {
-			notification.Reply(fmt.Sprintf("deu erro escrevendo o arquivo com colorscheme %v", err))
-			return
-		}
+		command.Exec(args, &notification)
 	}
 }
