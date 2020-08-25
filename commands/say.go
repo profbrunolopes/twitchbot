@@ -9,7 +9,8 @@ import (
 )
 
 func startSaying() *Command {
-	ch := make(chan string, 50)
+	const bufferLen = 50
+	ch := make(chan string, bufferLen)
 	go func() {
 		for message := range ch {
 			err := exec.Command("say", "-v", "Joana", message).Run()

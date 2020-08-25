@@ -50,8 +50,11 @@ func New() (*Commands, error) {
 					"defender C",
 					"não gostar do @pokemaobr",
 				}
+				//nolint:gosec
 				reason := reasons[rand.Intn(len(reasons))]
-				notification.Reply(fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User, strings.Join(args, " "), reason))
+				target := strings.Join(args, " ")
+				msg := fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User, target, reason)
+				notification.Reply(msg)
 			},
 		},
 		"colorscheme": {
