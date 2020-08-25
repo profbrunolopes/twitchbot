@@ -10,10 +10,12 @@ import (
 )
 
 type Commands struct {
+	sayChan chan<- string
 }
 
 func New() (*Commands, error) {
-	return &Commands{}, nil
+	sayChan := startSaying()
+	return &Commands{sayChan: sayChan}, nil
 }
 
 // !addcommand
@@ -89,6 +91,19 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 			return
 		}
 		notification.Reply(fmt.Sprintf("/me baniu %s por usar dark mode", parts[1]))
+	}
+
+	if strings.HasPrefix(notification.Message.Text, "!sorteio") {
+		notification.Reply(fmt.Sprintf("parabéns %s, você ganhou uma licença do Vim!", notification.Message.User))
+	}
+
+	if strings.HasPrefix(notification.Message.Text, "!say") {
+		parts := strings.SplitN(notification.Message.Text, " ", 2)
+		if len(parts) != 2 {
+			notification.Reply("comando inválido")
+			return
+		}
+		c.sayChan <- parts[1]
 	}
 
 	// próxima lives:
