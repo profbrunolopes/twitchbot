@@ -53,6 +53,8 @@ func New() (*Commands, error) {
 					"usar Windows",
 					"abusar do !say",
 					"depositar 89 mil reais na conta da Micheque Kappa",
+					"defender C",
+					"não gostar do @pokemaobr",
 				}
 				reason := reasons[rand.Intn(len(reasons))]
 				notification.Reply(fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User, strings.Join(args, " "), reason))
