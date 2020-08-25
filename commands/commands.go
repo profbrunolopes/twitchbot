@@ -44,11 +44,11 @@ func New() (*Commands, error) {
 					"comprar um Mac Pro pra jogar Minecraft",
 					"usar VSCode",
 					"jogar Tibia",
-					"usar Windows",
 					"abusar do !say",
 					"depositar 89 mil reais na conta da Micheque Kappa",
 					"defender C",
 					"não gostar do @pokemaobr",
+					"colocar purê no cachorro quente",
 				}
 				//nolint:gosec
 				reason := reasons[rand.Intn(len(reasons))]
