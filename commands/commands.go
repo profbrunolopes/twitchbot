@@ -11,9 +11,6 @@ import (
 )
 
 // Command represents a bot command.
-//
-// TODO(fsouza): implement permissions? Or handle permissions as suggested by
-// @CodeShow?
 type Command struct {
 	MinArgs int
 	Exec    func(args []string, notification *messages.Notification)
@@ -29,9 +26,6 @@ type Commands struct {
 }
 
 // New creates the command processor.
-//
-// TODO(fsouza): allow registering commands dynamically, so we don't need to
-// declare the list of commands statically in the constructor.
 func New() (*Commands, error) {
 	rand.Seed(time.Now().Unix())
 	commands := map[string]*Command{
