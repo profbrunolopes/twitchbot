@@ -23,6 +23,7 @@ func commandFn(exec func([]string, *messages.Notification)) *Command {
 
 type Commands struct {
 	commands map[string]*Command
+	aliases  map[string]string
 }
 
 // New creates the command processor.
@@ -70,7 +71,14 @@ func New() (*Commands, error) {
 		},
 		"music": commandFn(music),
 	}
-	return &Commands{commands: commands}, nil
+	aliases := map[string]string{
+		"musica":     "music",
+		"tocando":    "music",
+		"nowplaying": "music",
+		"comandos":   "commands",
+	}
+	c := Commands{commands: commands, aliases: aliases}
+	return &c, nil
 }
 
 func (c *Commands) Subscribe(notification messages.Notification) {
@@ -81,6 +89,9 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 
 	parts := strings.Split(text, " ")
 	commandName := parts[0][1:]
+	if aliased, ok := c.aliases[commandName]; ok {
+		commandName = aliased
+	}
 	args := parts[1:]
 	if command := c.commands[commandName]; command != nil {
 		if len(args) < command.MinArgs {
@@ -93,6 +104,3 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 	}
 }
 
-func (c *Commands) AddAlias(alias, target string) {
-	c.commands[alias] = c.commands[target]
-}
