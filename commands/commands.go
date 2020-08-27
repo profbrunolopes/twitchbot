@@ -83,9 +83,15 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 	args := parts[1:]
 	if command := c.commands[commandName]; command != nil {
 		if len(args) < command.MinArgs {
-			notification.Reply(command.Help)
+			if command.Help != "" {
+				notification.Reply(command.Help)
+			}
 			return
 		}
 		command.Exec(args, &notification)
 	}
+}
+
+func (c *Commands) AddAlias(alias, target string) {
+	c.commands[alias] = c.commands[target]
 }
