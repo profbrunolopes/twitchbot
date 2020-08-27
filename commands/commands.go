@@ -68,6 +68,7 @@ func New() (*Commands, error) {
 				}
 			},
 		},
+		"music": commandFn(music),
 	}
 	return &Commands{commands: commands}, nil
 }
