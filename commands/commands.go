@@ -78,9 +78,7 @@ func New() (*Commands, error) {
 		"nowplaying": "music",
 		"comandos":   "commands",
 	}
-	c := Commands{commands: commands, aliases: aliases}
-	c.commands["commands"] = commandFn(c.displayCommands)
-	return &c, nil
+	return &Commands{commands: commands, aliases: aliases}, nil
 }
 
 func (c *Commands) Subscribe(notification messages.Notification) {
@@ -104,9 +102,12 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 		}
 		command.Exec(args, &notification)
 	}
+	if commandName == "commands" {
+		c.displayCommands(&notification)
+	}
 }
 
-func (c *Commands) displayCommands(_ []string, notification *messages.Notification) {
+func (c *Commands) displayCommands(notification *messages.Notification) {
 	commands := make([]string, 0, len(c.commands))
 	for command := range c.commands {
 		commands = append(commands, "!"+command)
