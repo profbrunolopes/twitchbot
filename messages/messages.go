@@ -12,8 +12,6 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-var modNoticeRegexp = regexp.MustCompile(`^The moderators of this channel are: (.+)$`)
-
 type Notification struct {
 	Message      Message
 	channel      string
@@ -41,6 +39,7 @@ type User struct {
 }
 
 func (u *User) IsMod() (bool, error) {
+	modNoticeRegexp := regexp.MustCompile(`^The moderators of this channel are: (.+)$`)
 	const timeout = 500 * time.Millisecond
 	u.producer.say("/mods")
 	select {

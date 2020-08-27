@@ -24,7 +24,7 @@ func main() {
 	producer := messages.NewProducer(&options)
 	_, err = producer.Subscribe(func(notification messages.Notification) {
 		msg := notification.Message
-		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User, msg.Text)
+		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User.DisplayName, msg.Text)
 	})
 	if err != nil {
 		log.Fatal(err)

@@ -33,7 +33,7 @@ func New() (*Commands, error) {
 	commands := map[string]*Command{
 		"say": startSaying(),
 		"sorteio": commandFn(func(_ []string, notification *messages.Notification) {
-			notification.Reply(fmt.Sprintf("parabéns %s, você ganhou uma licença do Vim!", notification.Message.User))
+			notification.Reply(fmt.Sprintf("parabéns %s, você ganhou uma licença do Vim!", notification.Message.User.DisplayName))
 		}),
 		"ban": {
 			MinArgs: 1,
@@ -55,7 +55,7 @@ func New() (*Commands, error) {
 				//nolint:gosec
 				reason := reasons[rand.Intn(len(reasons))]
 				target := strings.Join(args, " ")
-				msg := fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User, target, reason)
+				msg := fmt.Sprintf("/me %s baniu %s por %s", notification.Message.User.DisplayName, target, reason)
 				notification.Reply(msg)
 			},
 		},
