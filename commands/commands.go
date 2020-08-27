@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"sort"
 	"strings"
 	"time"
 
@@ -78,6 +79,7 @@ func New() (*Commands, error) {
 		"comandos":   "commands",
 	}
 	c := Commands{commands: commands, aliases: aliases}
+	c.commands["commands"] = commandFn(c.displayCommands)
 	return &c, nil
 }
 
@@ -104,3 +106,11 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 	}
 }
 
+func (c *Commands) displayCommands(_ []string, notification *messages.Notification) {
+	commands := make([]string, 0, len(c.commands))
+	for command := range c.commands {
+		commands = append(commands, "!"+command)
+	}
+	sort.Strings(commands)
+	notification.Reply(fmt.Sprintf("/me available commands: %s", strings.Join(commands, ", ")))
+}
