@@ -40,5 +40,5 @@ func music(_ []string, notification *messages.Notification) {
 }
 
 func noMusic(notification *messages.Notification) {
-	notification.Reply("nenhuma música tocando no momento")
+	notification.Reply("/me nenhuma música tocando no momento")
 }
