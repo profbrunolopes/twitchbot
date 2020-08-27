@@ -19,8 +19,8 @@ type gmdpPlayback struct {
 }
 
 func music(_ []string, notification *messages.Notification) {
-	filePath := os.ExpandEnv("${HOME}/Library/Application Support/Google Play Music Desktop Player/json_store/playback.json")
-	f, err := os.Open(filePath)
+	const filePath = "${HOME}/Library/Application Support/Google Play Music Desktop Player/json_store/playback.json"
+	f, err := os.Open(os.ExpandEnv(filePath))
 	if err != nil {
 		noMusic(notification)
 		return
