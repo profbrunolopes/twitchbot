@@ -69,6 +69,7 @@ func New() (*Commands, error) {
 					return
 				}
 			},
+			Help: "veja lista de colorscheme disponíveis: https://skip.gg/erHqu",
 		},
 		"music": commandFn(music),
 	}
@@ -96,7 +97,7 @@ func (c *Commands) Subscribe(notification messages.Notification) {
 	if command := c.commands[commandName]; command != nil {
 		if len(args) < command.MinArgs {
 			if command.Help != "" {
-				notification.Reply(command.Help)
+				notification.Reply("/me " + command.Help)
 			}
 			return
 		}
