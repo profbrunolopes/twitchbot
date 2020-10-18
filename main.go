@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -40,12 +41,12 @@ func registerSubscribers(producer *messages.Producer) error {
 	for _, sub := range defaultSubscribers {
 		_, err := producer.Subscribe(sub)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to register default subscriber: %w", err)
 		}
 	}
 	commandsSubscriber, err := commands.New()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create the commands manager: %w", err)
 	}
 	_, err = producer.Subscribe(commandsSubscriber.Subscribe)
 	return err

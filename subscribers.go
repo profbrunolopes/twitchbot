@@ -16,23 +16,24 @@ func matchReply(re *regexp.Regexp, response string) messages.Notify {
 			notification.Reply(response)
 		}
 	}
-
 }
 
-var defaultSubscribers = []messages.Notify{
-	salve,
-	qa,
-	logger,
-}
+var (
+	// replies with :w whenever someone says 'salve'.
+	salve = matchReply(regexp.MustCompile(`salve`), "/me :w")
 
-// replies with :w whenever someone says 'salve'
-var salve = matchReply(regexp.MustCompile(`salve`), "/me :w")
+	// replies with a Vim error message whenever someone says ':qa'.
+	qa = matchReply(regexp.MustCompile(`^:qa$`), `/me E162: No write since last change for buffer "chat"`)
 
-// replies with a Vim error message whenever someone says ':qa'
-var qa = matchReply(regexp.MustCompile(`^:qa$`), `/me E162: No write since last change for buffer "chat"`)
+	// logs all messages to stdout.
+	logger = func(notification messages.Notification) {
+		msg := notification.Message
+		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User.DisplayName, msg.Text)
+	}
 
-// logs all messages to stdout
-var logger = func(notification messages.Notification) {
-	msg := notification.Message
-	fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User.DisplayName, msg.Text)
-}
+	defaultSubscribers = []messages.Notify{
+		salve,
+		qa,
+		logger,
+	}
+)
