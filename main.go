@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/ChicoCodes/twitchbot/commands"
@@ -14,6 +15,11 @@ import (
 func main() {
 	channel := flag.String("channel", "", "channel to connect to")
 	flag.Parse()
+
+	if *channel == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	options := messages.ProducerOptions{Channel: *channel}
 	err := envconfig.Process("twitch", &options)
