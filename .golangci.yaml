@@ -9,4 +9,5 @@ linters:
     - lll
     - misspell
     - nlreturn
+    - wrapcheck
     - wsl
