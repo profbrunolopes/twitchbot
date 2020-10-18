@@ -2,10 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/ChicoCodes/twitchbot/commands"
 	"github.com/ChicoCodes/twitchbot/messages"
@@ -28,34 +26,7 @@ func main() {
 	}
 
 	producer := messages.NewProducer(&options)
-	_, err = producer.Subscribe(func(notification messages.Notification) {
-		msg := notification.Message
-		fmt.Printf("[%s] %s: %s\n", msg.Timestamp, msg.User.DisplayName, msg.Text)
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = producer.Subscribe(func(notification messages.Notification) {
-		if strings.Contains(strings.ToLower(notification.Message.Text), "salve") {
-			notification.Reply("/me :w")
-		}
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = producer.Subscribe(func(notification messages.Notification) {
-		if strings.ToLower(notification.Message.Text) == ":qa" {
-			notification.Reply(`/me E162: No write since last change for buffer "chat"`)
-		}
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmds, err := commands.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = producer.Subscribe(cmds.Subscribe)
+	err = registerSubscribers(producer)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,4 +34,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func registerSubscribers(producer *messages.Producer) error {
+	for _, sub := range defaultSubscribers {
+		_, err := producer.Subscribe(sub)
+		if err != nil {
+			return err
+		}
+	}
+	commandsSubscriber, err := commands.New()
+	if err != nil {
+		return err
+	}
+	_, err = producer.Subscribe(commandsSubscriber.Subscribe)
+	return err
 }
