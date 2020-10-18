@@ -4,7 +4,6 @@ run:
 linters:
   enable-all: true
   disable:
-    - exhaustivestruct
     - goerr113
     - lll
     - misspell
