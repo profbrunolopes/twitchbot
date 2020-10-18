@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/ChicoCodes/twitchbot/commands"
 	"github.com/ChicoCodes/twitchbot/messages"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -27,7 +25,7 @@ func main() {
 	}
 
 	producer := messages.NewProducer(&options)
-	err = registerSubscribers(producer)
+	err = registerDefaultSubscribers(producer)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,19 +33,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func registerSubscribers(producer *messages.Producer) error {
-	for _, sub := range defaultSubscribers {
-		_, err := producer.Subscribe(sub)
-		if err != nil {
-			return fmt.Errorf("failed to register default subscriber: %w", err)
-		}
-	}
-	commandsSubscriber, err := commands.New()
-	if err != nil {
-		return fmt.Errorf("failed to create the commands manager: %w", err)
-	}
-	_, err = producer.Subscribe(commandsSubscriber.Subscribe)
-	return err
 }
